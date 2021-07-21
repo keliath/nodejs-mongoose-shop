@@ -1,4 +1,31 @@
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+// const sendgrid = require('nodemailer-sendgrid'); //sendgrid
+
+// const transporter = nodemailer.createTransport(sendgrid({
+//   auth: {
+//     api_user:
+//     api_keu:
+//   }
+// }));
+
+const USER_MAIL = "ae80ff045ae31e";
+const USER_PASS = "ba244e17ce373c";
+const transporter = nodemailer.createTransport({
+  host: "smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: USER_MAIL,
+    pass: USER_PASS,
+  },
+});
+// transporter.verify(function(error, success) {
+//   if (error) {
+//        console.log(error);
+//   } else {
+//        console.log('Server is ready to take our messages');
+//   }
+// });
 
 const User = require("../models/user");
 
@@ -62,7 +89,10 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then((userDoc) => {
       if (userDoc) {
-        req.flash("error", "E-mail exists already, please pick a different one.");
+        req.flash(
+          "error",
+          "E-mail exists already, please pick a different one."
+        );
         return res.redirect("/signup");
       }
       return bcrypt
@@ -76,10 +106,25 @@ exports.postSignup = (req, res, next) => {
           return user.save();
         })
         .then((result) => {
+          const mailOptions = {
+            from: '"Example Team" <shop@example.com>',
+            to: email, //"user1@example.com, user2@example.com",
+            subject: "Nice Nodemailer test",
+            text: "Hey there, it’s our first message sent with Nodemailer ;) ",
+            html: "<b>Hey there! </b><br> This is our first message sent with Nodemailer; you succesfull signup!",
+          };
+
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.log(error);
+            }
+            console.log("Message sent: %s", info.messageId);
+          });
           res.redirect("/login");
+
         });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log("mail error", err));
 };
 
 exports.postLogout = (req, res, next) => {

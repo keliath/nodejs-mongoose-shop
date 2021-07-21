@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
-const flash = require('connect-flash');
+const flash = require("connect-flash");
 
 const MONGODB_URI =
   "mongodb+srv://carlos:GCcq4p1hT8lTUi3T@cluster0.yhobs.mongodb.net/shop?retryWrites=true&w=majority";
