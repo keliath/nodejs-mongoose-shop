@@ -22,15 +22,16 @@ const transporter = nodemailer.createTransport({
     pass: USER_PASS,
   },
 });
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("probando1");
-    console.log(error);
-  } else {
-    console.log("probando2");
-    console.log("Server is ready to take our messages");
-  }
-});
+
+// transporter.verify(function (error, success) {
+//   if (error) {
+//     console.log("probando1");
+//     console.log(error);
+//   } else {
+//     console.log("probando2");
+//     console.log("Server is ready to take our messages");
+//   }
+// });
 
 const User = require("../models/user");
 
@@ -44,6 +45,7 @@ exports.getLogin = (req, res, next) => {
       email: "",
       password: "",
     },
+    validationErrors: [],
   });
 };
 
@@ -57,6 +59,7 @@ exports.getSignup = (req, res, next) => {
       password: "",
       confirmPassword: "",
     },
+    validationErrors: [],
   });
 };
 
@@ -73,14 +76,20 @@ exports.postLogin = (req, res, next) => {
       pageTitle: "login",
       errorMessage: errors.array()[0].msg,
       oldInput: { email: email, password: password },
+      validationErrors: errors.array(),
     });
   }
 
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Invalid Email or password.");
-        return res.redirect("/login");
+        return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "login",
+          errorMessage: "Invalid Email or password.",
+          oldInput: { email: email, password: password },
+          validationErrors: [],
+        });
       }
 
       bcrypt
@@ -95,8 +104,13 @@ exports.postLogin = (req, res, next) => {
               return res.redirect("/");
             });
           }
-          req.flash("error", "Invalid Email or password.");
-          res.redirect("/login");
+           return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "login",
+          errorMessage: "Invalid Email or password.",
+          oldInput: { email: email, password: password },
+          validationErrors: [],
+        });
         })
         .catch((err) => {
           console.log("err".err);
@@ -123,6 +137,7 @@ exports.postSignup = (req, res, next) => {
         password: password,
         confirmPassword: req.body.confirmPassword,
       },
+      validationErrors: errors.array(),
     });
   }
 

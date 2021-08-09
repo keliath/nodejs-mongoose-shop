@@ -16,13 +16,14 @@ router.get("/signup", authController.getSignup);
 router.post(
   "/login",
   [
-    body("email", "Please enter a valid email.").isEmail(),
+    body("email", "Please enter a valid email.").isEmail().normalizeEmail(),
     body(
       "password",
       "the password must be at least 4 characters and only contains only numbers and text"
     )
       .isLength({ min: 4, max: 16 })
-      .isAlphanumeric(),
+      .isAlphanumeric()
+      .trim(),
   ],
   authController.postLogin
 );
@@ -45,7 +46,8 @@ router.post(
             );
           }
         });
-      }), //custom for custom validators
+      })
+      .normalizeEmail(), //custom for custom validators
 
     body(
       "password",
@@ -53,14 +55,17 @@ router.post(
     ) //deault message in the check constructor
       // unlike check, body too check but only the fields inside body req
       .isLength({ min: 4, max: 16 })
-      .isAlphanumeric(),
+      .isAlphanumeric()
+      .trim(),
 
-    body("confirmPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords have to match!");
-      }
-      return true;
-    }),
+    body("confirmPassword")
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Passwords have to match!");
+        }
+        return true;
+      })
+      .trim(),
   ],
   authController.postSignup
 );
