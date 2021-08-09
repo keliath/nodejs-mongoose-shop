@@ -22,13 +22,13 @@ const transporter = nodemailer.createTransport({
     pass: USER_PASS,
   },
 });
-transporter.verify(function(error, success) {
+transporter.verify(function (error, success) {
   if (error) {
-    console.log('probando1');
+    console.log("probando1");
     console.log(error);
   } else {
-    console.log('probando2');
-    console.log('Server is ready to take our messages');
+    console.log("probando2");
+    console.log("Server is ready to take our messages");
   }
 });
 
@@ -40,6 +40,10 @@ exports.getLogin = (req, res, next) => {
     path: "/login",
     pageTitle: "Login",
     errorMessage: req.flash("error"),
+    oldInput: {
+      email: "",
+      password: "",
+    },
   });
 };
 
@@ -48,6 +52,11 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMessage: req.flash("error"),
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 };
 
@@ -63,6 +72,7 @@ exports.postLogin = (req, res, next) => {
       path: "/login",
       pageTitle: "login",
       errorMessage: errors.array()[0].msg,
+      oldInput: { email: email, password: password },
     });
   }
 
@@ -81,7 +91,7 @@ exports.postLogin = (req, res, next) => {
             req.session.user = user;
             return req.session.save((err) => {
               //normaly dont need to do that save(), only in scenarios weree session was created before
-              console.log('e'.err);
+              console.log("e".err);
               return res.redirect("/");
             });
           }
@@ -89,7 +99,7 @@ exports.postLogin = (req, res, next) => {
           res.redirect("/login");
         })
         .catch((err) => {
-          console.log('err'.err);
+          console.log("err".err);
           res.redirect("/login");
         });
     })
@@ -108,6 +118,11 @@ exports.postSignup = (req, res, next) => {
       path: "/signup",
       pageTitle: "Signup",
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: req.body.confirmPassword,
+      },
     });
   }
 
