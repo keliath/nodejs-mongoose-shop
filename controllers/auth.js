@@ -1,5 +1,7 @@
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+// const { validationResult } = require("express-validator/check"); //deprecated /check
+const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 // const sendgrid = require('nodemailer-sendgrid'); //sendgrid
 
@@ -20,13 +22,15 @@ const transporter = nodemailer.createTransport({
     pass: USER_PASS,
   },
 });
-// transporter.verify(function(error, success) {
-//   if (error) {
-//        console.log(error);
-//   } else {
-//        console.log('Server is ready to take our messages');
-//   }
-// });
+transporter.verify(function(error, success) {
+  if (error) {
+    console.log('probando1');
+    console.log(error);
+  } else {
+    console.log('probando2');
+    console.log('Server is ready to take our messages');
+  }
+});
 
 const User = require("../models/user");
 
@@ -51,6 +55,17 @@ exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    // console.log(errors.array());
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "login",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
@@ -65,8 +80,8 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
             return req.session.save((err) => {
-              //normaly dont need to do that save(), only in scenarios the session was created before
-              console.log(err);
+              //normaly dont need to do that save(), only in scenarios weree session was created before
+              console.log('e'.err);
               return res.redirect("/");
             });
           }
@@ -74,7 +89,7 @@ exports.postLogin = (req, res, next) => {
           res.redirect("/login");
         })
         .catch((err) => {
-          console.log(err);
+          console.log('err'.err);
           res.redirect("/login");
         });
     })
@@ -85,46 +100,44 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
 
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash(
-          "error",
-          "E-mail exists already, please pick a different one."
-        );
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          const user = new User({
-            email: email,
-            password: hashedPassword,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((result) => {
-          const mailOptions = {
-            from: '"Example Team" <shop@example.com>',
-            to: email, //"user1@example.com, user2@example.com",
-            subject: "Nice Nodemailer test",
-            text: "Hey there, it’s our first message sent with Nodemailer ;) ",
-            html: "<b>Hey there! </b><br> This is our first message sent with Nodemailer; you succesfull signup!",
-          };
+  if (!errors.isEmpty()) {
+    // console.log(errors.array());
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
 
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.log(error);
-            }
-            console.log("Message sent: %s", info.messageId);
-          });
-          res.redirect("/login");
-        });
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      const user = new User({
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] },
+      });
+      return user.save();
     })
-    .catch((err) => console.log("mail error", err));
+    .then((result) => {
+      const mailOptions = {
+        from: '"Example Team" <shop@example.com>',
+        to: email, //"user1@example.com, user2@example.com",
+        subject: "Nice Nodemailer test",
+        text: "Hey there, it’s our first message sent with Nodemailer ;) ",
+        html: "<b>Hey there! </b><br> This is our first message sent with Nodemailer; you succesfull signup!",
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+        console.log("Message sent: %s", info.messageId);
+      });
+      res.redirect("/login");
+    });
 };
 
 exports.postLogout = (req, res, next) => {
@@ -222,8 +235,9 @@ exports.postNewPassword = (req, res, next) => {
       resetUser.resetToken = undefined;
       resetUser.resetTokenExpiration = undefined;
       return resetUser.save();
-    }).then(result => {
-      res.redirect('/login');
+    })
+    .then((result) => {
+      res.redirect("/login");
     })
     .catch((err) => console.log(err));
 };

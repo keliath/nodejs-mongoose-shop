@@ -98,7 +98,7 @@ exports.postOrder = (req, res, next) => {
     }).then(() => {
         res.redirect('/orders');
     }).catch(err => console.log(err));
-};
+}
 
 exports.getOrders = (req, res, next) => {
     Order.find({
@@ -113,4 +113,4 @@ exports.getOrders = (req, res, next) => {
         });
     }).catch(err => console.log(err));
 
-};
+}

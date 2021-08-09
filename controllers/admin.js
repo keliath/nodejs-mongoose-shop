@@ -7,7 +7,7 @@ exports.getAddProducts = (req, res, next) => {
     editing: false,
     isAuthenticated: req.session.isLoggedIn,
   });
-};
+}
 
 exports.postAddProducts = (req, res, next) => {
   const title = req.body.title;
@@ -30,7 +30,7 @@ exports.postAddProducts = (req, res, next) => {
       res.redirect("product-list");
     })
     .catch((err) => console.log(err));
-};
+}
 
 exports.getEditProducts = (req, res, next) => {
   const editMode = req.query.edit; //edit seria el nombre de la variable url, siempre devuelve el valor en string ya sea true o false
@@ -53,7 +53,7 @@ exports.getEditProducts = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-};
+}
 
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -78,7 +78,7 @@ exports.postEditProduct = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-};
+}
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -87,7 +87,7 @@ exports.postDeleteProduct = (req, res, next) => {
       res.redirect("/admin/product-list");
     })
     .catch((err) => console.log(err));
-};
+}
 
 exports.getProducts = (req, res, next) => {
   Product.find({ userId: req.user._id }) //.select('a b -c') to select only (or exclude) the desired data -- .populate('userId', "name") to fecth all data relations include
@@ -101,4 +101,4 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-};
+}
