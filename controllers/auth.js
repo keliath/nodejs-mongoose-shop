@@ -47,7 +47,7 @@ exports.getLogin = (req, res, next) => {
     },
     validationErrors: [],
   });
-};
+}
 
 exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
@@ -61,7 +61,7 @@ exports.getSignup = (req, res, next) => {
     },
     validationErrors: [],
   });
-};
+}
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
@@ -104,22 +104,26 @@ exports.postLogin = (req, res, next) => {
               return res.redirect("/");
             });
           }
-           return res.status(422).render("auth/login", {
-          path: "/login",
-          pageTitle: "login",
-          errorMessage: "Invalid Email or password.",
-          oldInput: { email: email, password: password },
-          validationErrors: [],
-        });
+          return res.status(422).render("auth/login", {
+            path: "/login",
+            pageTitle: "login",
+            errorMessage: "Invalid Email or password.",
+            oldInput: { email: email, password: password },
+            validationErrors: [],
+          });
         })
         .catch((err) => {
           console.log("err".err);
           res.redirect("/login");
         });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
   // res.setHeader('Set-Cookie', 'loggeIn=true'); //Max-Age=10, Expires= http-date-format, Domain =, Secure, httpOnly->security layer forcross site attacks
-};
+}
 
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
@@ -168,14 +172,14 @@ exports.postSignup = (req, res, next) => {
       });
       res.redirect("/login");
     });
-};
+}
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
     console.log(err);
     res.redirect("/");
   });
-};
+}
 
 exports.getReset = (req, res, next) => {
   res.render("auth/reset", {
@@ -183,7 +187,7 @@ exports.getReset = (req, res, next) => {
     pageTitle: "Reset Password",
     errorMessage: req.flash("error"),
   });
-};
+}
 
 exports.postReset = (req, res, next) => {
   crypto.randomBytes(32, (err, buffer) => {
@@ -222,9 +226,13 @@ exports.postReset = (req, res, next) => {
           console.log("Message sent: %s", info.messageId);
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
   });
-};
+}
 
 exports.getNewPassword = (req, res, next) => {
   const token = req.params.token;
@@ -242,8 +250,12 @@ exports.getNewPassword = (req, res, next) => {
         passwordToken: token,
       });
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
 
 exports.postNewPassword = (req, res, next) => {
   const newPassword = req.body.password;
@@ -269,5 +281,9 @@ exports.postNewPassword = (req, res, next) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}

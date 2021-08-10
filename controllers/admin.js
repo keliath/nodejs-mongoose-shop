@@ -11,7 +11,7 @@ exports.getAddProducts = (req, res, next) => {
     errorMessage: [],
     validationErrors: [],
   });
-};
+}
 
 exports.postAddProducts = (req, res, next) => {
   const title = req.body.title;
@@ -55,8 +55,30 @@ exports.postAddProducts = (req, res, next) => {
       // console.log('product created');
       res.redirect("product-list");
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      // res.redirect("/500");
+
+      // const error = new Error(err);
+      // error.httpStatusCode = 500;
+      // return next(error);
+
+      return res.status(500).render("admin/edit-product", {
+        pageTitle: "add-product",
+        path: "/admin/add-product",
+        editing: false,
+        isAuthenticated: req.session.isLoggedIn,
+        errorMessage: "Database operation failed, please try again",
+        product: {
+          title: title,
+          imageUrl: imageUrl,
+          price: price,
+          description: description,
+        },
+        validationErrors: [],
+        hasError: true,
+      });
+    });
+}
 
 exports.getEditProducts = (req, res, next) => {
   const editMode = req.query.edit; //edit seria el nombre de la variable url, siempre devuelve el valor en string ya sea true o false
@@ -81,8 +103,12 @@ exports.getEditProducts = (req, res, next) => {
         validationErrors: [],
       });
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
 
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -128,8 +154,12 @@ exports.postEditProduct = (req, res, next) => {
         res.redirect("/admin/product-list");
       });
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -137,8 +167,12 @@ exports.postDeleteProduct = (req, res, next) => {
     .then((result) => {
       res.redirect("/admin/product-list");
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
 
 exports.getProducts = (req, res, next) => {
   Product.find({ userId: req.user._id }) //.select('a b -c') to select only (or exclude) the desired data -- .populate('userId', "name") to fecth all data relations include
@@ -151,5 +185,9 @@ exports.getProducts = (req, res, next) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
-};
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
