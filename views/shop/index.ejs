@@ -33,6 +33,8 @@
                             </article>
                             <% } %>
                     </div>
+                    <%- include('../includes/pagination',{currentPage:currentPage, hasPreviusPage:hasPreviusPage, previusPage:previusPage, hasNextPage:hasNextPage, nextPage:nextPage,lastPage:lastPage}) %>
+
                     <% } else { %>
                         <h1>No products</h1>
                         <% } %>
