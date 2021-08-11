@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const Product = require("../models/product");
 const Order = require("../models/order");
 
@@ -149,7 +152,7 @@ exports.getOrders = (req, res, next) => {
     "user.userId": req.user._id,
   })
     .then((orders) => {
-      console.log(orders);
+      // console.log(orders);
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Order",
@@ -162,4 +165,48 @@ exports.getOrders = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return next(new Error("no order found."));
+      }
+
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error("Unauthorized!"));
+      }
+
+      const invoiceName = "invoice-" + orderId + ".pdf";
+      const invoicePath = path.join("data", "invoices", invoiceName);
+      // fs.readFile(invoicePath, (err, data) => {
+      //   if (err) {
+      //     return next(err);
+      //   }
+
+      //   res.setHeader("Content-Type", "application/pdf");
+      //   // res.setHeader('Content-Disposition', 'inline');
+      //   // res.setHeader(
+      //   //   "Content-Disposition",
+      //   //   'inline; filename="' + invoiceName + '"'
+      //   // );
+      //   res.setHeader(
+      //     "Content-Disposition",
+      //     'attachment; filename="' + invoiceName + '"'
+      //   );
+      //   res.send(data);
+      // });
+
+      const file = fs.createReadStream(invoicePath);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'inline; filename="' + invoiceName + '"'
+      );
+      file.pipe(res);
+    })
+    .catch((err) => next(err));
 };

@@ -23,7 +23,6 @@ router.post(
       .isLength({ min: 4 })
       .notEmpty()
       .trim(),
-    body("imageUrl", "empty or not valid URL").notEmpty().isURL(),
     body("price", "empty or not valid price, price must be a numeric value")
       .notEmpty()
       .isFloat(),
@@ -52,7 +51,6 @@ router.post(
       .isLength({ min: 4 })
       .notEmpty()
       .trim(),
-    body("imageUrl", "empty or not valid URL").notEmpty().isURL(),
     body("price", "empty or not valid price, price must be a numeric value")
       .notEmpty()
       .isFloat(),

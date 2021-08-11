@@ -11,13 +11,32 @@ exports.getAddProducts = (req, res, next) => {
     errorMessage: [],
     validationErrors: [],
   });
-}
+};
 
 exports.postAddProducts = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const description = req.body.description;
   const price = req.body.price;
+
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "add-product",
+      path: "/admin/add-product",
+      editing: false,
+      isAuthenticated: req.session.isLoggedIn,
+      errorMessage: "Attached file is not an image.",
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      validationErrors: [],
+      hasError: true,
+    });
+  }
+
+  const imageUrl = image.path;
 
   const product = new Product({
     title: title,
@@ -40,7 +59,6 @@ exports.postAddProducts = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -70,7 +88,6 @@ exports.postAddProducts = (req, res, next) => {
         errorMessage: "Database operation failed, please try again",
         product: {
           title: title,
-          imageUrl: imageUrl,
           price: price,
           description: description,
         },
@@ -78,7 +95,7 @@ exports.postAddProducts = (req, res, next) => {
         hasError: true,
       });
     });
-}
+};
 
 exports.getEditProducts = (req, res, next) => {
   const editMode = req.query.edit; //edit seria el nombre de la variable url, siempre devuelve el valor en string ya sea true o false
@@ -108,13 +125,13 @@ exports.getEditProducts = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
-}
+};
 
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const image = req.file;
   const updatedDescription = req.body.description;
 
   const errors = validationResult(req);
@@ -129,7 +146,6 @@ exports.postEditProduct = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
       product: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDescription,
         _id: prodId,
@@ -146,7 +162,9 @@ exports.postEditProduct = (req, res, next) => {
       }
       product.title = updatedTitle;
       product.price = updatedPrice;
-      product.imageUrl = updatedImageUrl;
+      if (image) {
+        product.imageUrl = image.path;
+      }
       product.description = updatedDescription;
 
       product.save().then((result) => {
@@ -159,7 +177,7 @@ exports.postEditProduct = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
-}
+};
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -172,7 +190,7 @@ exports.postDeleteProduct = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
-}
+};
 
 exports.getProducts = (req, res, next) => {
   Product.find({ userId: req.user._id }) //.select('a b -c') to select only (or exclude) the desired data -- .populate('userId', "name") to fecth all data relations include
@@ -190,4 +208,4 @@ exports.getProducts = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
-}
+};
