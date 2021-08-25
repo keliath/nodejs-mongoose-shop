@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -9,6 +10,7 @@ const flash = require("connect-flash");
 const multer = require("multer");
 const helmet = require("helmet");
 const compression = require("compression");
+const morgan = require("morgan");
 
 require("dotenv").config();
 
@@ -30,10 +32,15 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 const errorsController = require("./controllers/errors");
 
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  { flags: "a" }
+);
 console.log(process.env.NODE_ENV);
 
 app.use(helmet());
-// app.use(compression());   //just in case hosting provider dont support their own compression-or use your own server
+app.use(compression());   //just in case hosting provider dont support their own compression-or use your own server
+app.use(morgan("combined", { stream: accessLogStream })); //for loggin data also if hosting provider dont support this
 
 app.use(
   session({
