@@ -9,6 +9,8 @@ const flash = require("connect-flash");
 const multer = require("multer");
 const helmet = require("helmet");
 
+require("dotenv").config();
+
 const app = express();
 const store = new MongoDBStore({
   uri: process.env.MONGODB_URI,
