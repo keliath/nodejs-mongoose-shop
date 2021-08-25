@@ -8,6 +8,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const helmet = require("helmet");
+const compression = require("compression");
 
 require("dotenv").config();
 
@@ -32,6 +33,7 @@ const errorsController = require("./controllers/errors");
 console.log(process.env.NODE_ENV);
 
 app.use(helmet());
+// app.use(compression());   //just in case hosting provider dont support their own compression-or use your own server
 
 app.use(
   session({
