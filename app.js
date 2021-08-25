@@ -8,12 +8,9 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 
-const MONGODB_URI =
-  "mongodb+srv://carlos:GCcq4p1hT8lTUi3T@cluster0.yhobs.mongodb.net/shop?retryWrites=true&w=majority";
-
 const app = express();
 const store = new MongoDBStore({
-  uri: MONGODB_URI,
+  uri: process.env.MONGODB_URI,
   collection: "sessions",
   //expire:,moreOsptions:
 });
@@ -29,6 +26,8 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 const errorsController = require("./controllers/errors");
 
+console.log(process.env.NODE_ENV);
+
 app.use(
   session({
     secret: "my secret",
@@ -37,8 +36,6 @@ app.use(
     store: store,
   }) // , cookie{optios:}
 );
-
-
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -131,8 +128,11 @@ app.use(errorsController.error404);
 // });
 
 mongoose
-  .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then((result) => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));

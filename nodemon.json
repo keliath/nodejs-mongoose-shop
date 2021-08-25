@@ -1,0 +1,6 @@
+{
+  "env": {
+    "NODE_ENV": "production",
+    "MONGODB_URI": "mongodb+srv://carlos:GCcq4p1hT8lTUi3T@cluster0.yhobs.mongodb.net/shop?retryWrites=true&w=majority"
+  }
+}
