@@ -7,6 +7,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const helmet = require("helmet");
 
 const app = express();
 const store = new MongoDBStore({
@@ -27,6 +28,8 @@ const authRoutes = require("./routes/auth");
 const errorsController = require("./controllers/errors");
 
 console.log(process.env.NODE_ENV);
+
+app.use(helmet());
 
 app.use(
   session({
