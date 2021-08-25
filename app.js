@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const http = require("https");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -22,6 +23,9 @@ const store = new MongoDBStore({
 });
 const csrfProtection = csrf();
 
+// const privateKey = fs.readFileSync("server.key");
+// const certificate = fs.readFileSync("server.cert");
+
 app.set("view engine", "ejs");
 app.set("views", "views"); //type views it wouldnt necessary because its already the deafult value
 
@@ -39,7 +43,7 @@ const accessLogStream = fs.createWriteStream(
 console.log(process.env.NODE_ENV);
 
 app.use(helmet());
-app.use(compression());   //just in case hosting provider dont support their own compression-or use your own server
+app.use(compression()); //just in case hosting provider dont support their own compression-or use your own server
 app.use(morgan("combined", { stream: accessLogStream })); //for loggin data also if hosting provider dont support this
 
 app.use(
@@ -130,16 +134,16 @@ app.get("/500", errorsController.error500);
 
 app.use(errorsController.error404);
 
-// app.use((error, req, res, next) => {
-//   // res.status(error.httpStatusCode).render{...}
-//   // res.redirect("/500");
+app.use((error, req, res, next) => {
+  // res.status(error.httpStatusCode).render{...}
+  // res.redirect("/500");
 
-//   res.status(500).render("500", {
-//     pageTitle: "500 error",
-//     path: "500",
-//     isAuthenticated: req.session.isLoggedIn,
-//   });
-// });
+  res.status(500).render("500", {
+    pageTitle: "500 error",
+    path: "500",
+    isAuthenticated: req.session.isLoggedIn,
+  });
+});
 
 mongoose
   .connect(process.env.MONGODB_URI, {
@@ -148,5 +152,8 @@ mongoose
   })
   .then((result) => {
     app.listen(process.env.PORT || 3000);
+    // https
+    //   .createServer({ key: privateKey, cert: certificate }, app)
+    //   .listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));
